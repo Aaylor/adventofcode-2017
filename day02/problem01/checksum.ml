@@ -9,13 +9,15 @@ let check_max max input = do_check ( > ) max input
 
 let eval matrix =
   let eval_row (min, max) element =
+    (** For each element update the minimum and the maximum element of
+        the list. *)
     let min' = check_min min element in
     let max' = check_max max element in
-    (min', max')
+    min', max'
   in
   let eval_rows sum row =
-    let (min, max) = List.fold_left eval_row (None, None) row in
-    match min, max with
+    let row_result = List.fold_left eval_row (None, None) row in
+    match row_result with
     | Some min, Some max -> sum + (max - min)
     | _ -> failwith "bad input"
   in
@@ -37,19 +39,23 @@ let with_channel filename fn =
 
 let input_matrix filename =
   let process_line line =
+    (* It assume that the given input has its element separated by
+       \t characters, and not spaces. *)
     List.map
       int_of_string
       (String.split_on_char '\t' line)
   in
-  let rec lines channel =
-    try
-      let line = input_line channel in
-      process_line line :: lines channel
-    with End_of_file ->
-      []
+  let lines channel =
+    let rec exhaust lines =
+      try
+        let line = input_line channel in
+        exhaust (process_line line :: lines)
+      with End_of_file ->
+        lines
+    in
+    List.rev (exhaust [])
   in
   with_channel filename lines
-
 
 let () =
   let matrix = input_matrix "input" in
