@@ -18,6 +18,8 @@ SOURCE_CMX = $(SOURCE:%.ml=%.cmx)
 $(BINARY): $(SOURCE_CMX)
 	@$(OCAMLFIND) $(OCAMLOPT) -o $@ $^
 
+run: $(BINARY)
+	@./$(BINARY)
 
 ## GENERIC RULES
 
