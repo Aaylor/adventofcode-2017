@@ -1,5 +1,5 @@
 
-module StringSet = Set.Make(String)
+open Aoc_lib
 
 let layout_length = 16
 

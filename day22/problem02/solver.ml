@@ -85,28 +85,6 @@ let sporifica_virus max_bursts (coordinate, map) =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let foldi_string fn acc line =
-  let length = String.length line in
-  let rec aux_fold index acc =
-    if index >= length then
-      acc
-    else
-      let c = line.[index] in
-      let acc' = fn index acc c in
-      aux_fold (succ index) acc'
-  in
-  aux_fold 0 acc
-
 let extract_lines channel =
   let rec exhaust acc =
     try exhaust (input_line channel :: acc)
@@ -122,7 +100,7 @@ let extract_lines channel =
     List.fold_left
       (fun (index_y, map) line ->
          let map' =
-           foldi_string
+           Aoc_lib.ExtString.foldi
              (fun index_x map character ->
                 if character = '#' then
                   let coordinate = { x = index_x; y = index_y } in

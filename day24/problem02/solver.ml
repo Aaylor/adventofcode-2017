@@ -1,4 +1,6 @@
 
+open Aoc_lib
+
 (* TYPES *)
 
 type port =
@@ -9,12 +11,6 @@ module PortSet = Set.Make(struct
     type t = port
     let compare = compare
   end)
-
-module IntMap = Map.Make(struct
-    type t  = int
-    let compare = compare
-  end)
-
 
 (* BRIDGES *)
 

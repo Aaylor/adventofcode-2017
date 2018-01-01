@@ -107,16 +107,6 @@ let run context =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
 let with_line channel fn = fn (String.trim (input_line channel))
 
 let with_fmt_line channel fmt =

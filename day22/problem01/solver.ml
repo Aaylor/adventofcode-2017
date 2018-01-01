@@ -66,16 +66,6 @@ let sporifica_virus max_bursts (coordinate, map) =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
 let extract_lines channel =
   let rec exhaust acc =
     try exhaust (input_line channel :: acc)
