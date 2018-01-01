@@ -52,11 +52,10 @@ let eval_condition (Condition (register, operator, value)) =
   operator register_value value
 
 let rec eval_instructions instructions =
-  match Stream.peek instructions with
-  | None ->
+  match instructions with
+  | [] ->
     maximum_value ()
-  | Some { register; operation; value; condition } ->
-    ignore (Stream.next instructions);
+  | { register; operation; value; condition } :: instructions ->
     if eval_condition condition then begin
       let register_value = Register.get register in
       Register.set register (operation register_value value)
@@ -66,17 +65,7 @@ let rec eval_instructions instructions =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let parse_instruction line =
+let parse_instruction line acc =
   let parse_operation = function
     | "inc" -> ( + )
     | "dec" -> ( - )
@@ -98,18 +87,11 @@ let parse_instruction line =
       value;
       condition = Condition (cond_register, operator, cond_value) }
   in
-  Scanf.sscanf line "%s %s %d if %s %s %d" do_parse
-
-let stream_instruction channel =
-  let read_line _ =
-    try Some (parse_instruction (input_line channel))
-    with End_of_file -> None
-  in
-  Stream.from read_line
+  let instruction = Scanf.sscanf line "%s %s %d if %s %s %d" do_parse in
+  instruction :: acc
 
 let () =
-  with_channel "input"
-    (fun channel ->
-       let instructions = stream_instruction channel in
-       let result = eval_instructions instructions in
-       Format.printf "%d@." result)
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines_ordered ~start:[] parse_instruction)
+    ~aoc_solver:eval_instructions
+    ~aoc_printer:string_of_int

@@ -12,33 +12,11 @@ let process_instructions instructions =
   do_process 0 0
 
 
-(* Input *)
-
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let instructions channel =
-  let rec read_instruction acc =
-    try
-      let line = input_line channel in
-      let instruction = int_of_string line in
-      read_instruction (instruction :: acc)
-    with
-    | End_of_file ->
-      Array.of_list (List.rev acc)
-    | Failure _ (* int_of_string *) ->
-      failwith "Invalid input: integer expected."
-  in
-  read_instruction []
+(* INPUT *)
 
 let () =
-  let instructions = with_channel "input" instructions in
-  let result = process_instructions instructions in
-  Format.printf "%d@." result
+  let transform line acc = int_of_string line :: acc in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines_ordered ~start:[] transform)
+    ~aoc_solver:(fun is -> process_instructions (Array.of_list is))
+    ~aoc_printer:string_of_int

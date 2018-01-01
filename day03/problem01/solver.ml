@@ -37,16 +37,21 @@ let steps_from_center input square_root steps_to_axis =
   min (do_calc 5) |>
   min (do_calc 7)
 
-
-(* Inputs *)
-
-let input = 361527
-
-let () =
+let solve input =
   let square_root = closest_square_root input in
   let axis = axis_to_center square_root in
   let steps_from_center = steps_from_center input square_root axis in
   (* The final number correspond to the number of steps to reach the
      center of the correct axis, and then the number of steps to reach
      the input from the calculated center. *)
-  Format.printf "%d@." (axis + steps_from_center)
+  axis + steps_from_center
+
+
+(* INPUT *)
+
+let () =
+  let input = 361527 in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_static input)
+    ~aoc_solver:solve
+    ~aoc_printer:string_of_int

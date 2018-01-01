@@ -49,25 +49,12 @@ let do_knot_hash lengths =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let input_lengths channel =
-  try
-    let line = input_line channel in
-    let elements = String.split_on_char ',' line in
-    List.map int_of_string elements
-  with End_of_file ->
-    failwith "The input must have at least one line"
+let input_lengths line =
+  let elements = String.split_on_char ',' line in
+  List.map int_of_string elements
 
 let () =
-  let lengths = with_channel "input" input_lengths in
-  let result = do_knot_hash lengths in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_single_line input_lengths)
+    ~aoc_solver:do_knot_hash
+    ~aoc_printer:string_of_int

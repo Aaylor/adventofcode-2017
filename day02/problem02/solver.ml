@@ -35,37 +35,18 @@ let eval matrix =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let input_matrix filename =
-  let process_line line =
-    (* It assume that the given input has its element separated by
-       \t characters, and not spaces. *)
+let parse_line line acc =
+  (* It assume that the given input has its element separated by
+     \t characters, and not spaces. *)
+  let result_line =
     List.map
       int_of_string
       (String.split_on_char '\t' line)
   in
-  let lines channel =
-    let rec exhaust lines =
-      try
-        let line = input_line channel in
-        exhaust (process_line line :: lines)
-      with End_of_file ->
-        lines
-    in
-    List.rev (exhaust [])
-  in
-  with_channel filename lines
+  result_line :: acc
 
 let () =
-  let matrix = input_matrix "input" in
-  let result = eval matrix in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines ~start:[] parse_line)
+    ~aoc_solver:eval
+    ~aoc_printer:string_of_int

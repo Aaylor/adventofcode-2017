@@ -42,8 +42,6 @@ let repeat n fn value =
 
 (** {2 The solution} *)
 
-let input = 361527
-
 let array_size =
   (* For this, we just take a static size that just fit for the
      given input. *)
@@ -55,18 +53,6 @@ let array =
   let center = array_size / 2 in
   array.(center).(center) <- Some 1;
   array
-
-let pretty_array () =
-  Array.iter
-    (fun array ->
-       Array.iter
-         (fun value ->
-            match value with
-            | None -> Format.printf "%8s " "None"
-            | Some v -> Format.printf "%8d " v)
-         array;
-       Format.printf "@.")
-    array
 
 let eval_cell coordinate =
   let cells n = [ n - 1; n; n + 1 ] in
@@ -80,7 +66,7 @@ let eval_cell coordinate =
          sum (cells coordinate.x))
     0 (cells coordinate.y)
 
-let eval_squares coordinates =
+let eval_squares input coordinates =
   let exception Result_found of int in
   let wrap_eval_cell move coordinate =
     (* This is simple wrapper for eval_cell:
@@ -115,8 +101,16 @@ let eval_squares coordinates =
   try aux_eval_squares 1 coordinates
   with Result_found i -> i
 
-let () =
+let solve input =
   let init_coordinate = { x = array_size / 2; y = array_size / 2 } in
-  let result = eval_squares init_coordinate in
-  (* pretty_array (); *)
-  Format.printf "%d@." result
+  eval_squares input init_coordinate
+
+
+(* INPUT *)
+
+let () =
+  let input = 361527 in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_static input)
+    ~aoc_solver:solve
+    ~aoc_printer:string_of_int

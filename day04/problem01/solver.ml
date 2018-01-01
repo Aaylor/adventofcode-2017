@@ -8,33 +8,14 @@ let is_valid_line line =
   List.compare_lengths line line_sorted = 0
 
 
+(* INPUT *)
 
-(** {2 Input} *)
-
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let eval_input channel =
-  let rec aux_eval valid_lines =
-    try
-      let line = input_line channel in
-      let valid_lines' =
-        if is_valid_line line
-        then succ valid_lines
-        else valid_lines
-      in
-      aux_eval valid_lines'
-    with End_of_file -> valid_lines
-  in
-  aux_eval 0
+let check_line line valid_lines =
+  if is_valid_line line then succ valid_lines
+  else valid_lines
 
 let () =
-  let result = with_channel "input" eval_input in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines ~start:0 check_line)
+    ~aoc_solver:(fun i -> i)
+    ~aoc_printer:string_of_int

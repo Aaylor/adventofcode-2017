@@ -1,9 +1,10 @@
 
-let eval stream =
-  let rec eval_group depth sum =
-    match Stream.next stream with
-    | '{' -> eval_group (succ depth) sum
-    | ',' -> eval_group depth sum
+let eval input =
+  let rec eval_group ~index depth sum =
+    let index' = succ index in
+    match input.[index]  with
+    | '{' -> eval_group ~index:index' (succ depth) sum
+    | ',' -> eval_group ~index:index' depth sum
     | '}' ->
       (* We assume that the input always start with '{'. Then, closing
          the first bracket would lead to depth equal to 0, which is
@@ -11,41 +12,28 @@ let eval stream =
          We make the assertion that the input cannot contain mutliple
          "toplevel" groups. *)
       if depth = 1 then succ sum
-      else eval_group (pred depth) (sum + depth)
+      else eval_group ~index:index' (pred depth) (sum + depth)
     | '<' ->
-      garbage depth sum
+      garbage ~index:index' depth sum
     | _ ->
       failwith "Malformed input"
-  and garbage depth sum =
-    match Stream.next stream with
+  and garbage ~index depth sum =
+    let index' = succ index in
+    match input.[index]  with
     | '>' ->
-      eval_group depth sum
+      eval_group ~index:index' depth sum
     | '!' ->
-      ignore (Stream.next stream);
-      garbage depth sum
+      garbage ~index:(succ index') depth sum
     | _ ->
-      garbage depth sum
+      garbage ~index:index'  depth sum
   in
-  eval_group 0 0
+  eval_group ~index:0 0 0
 
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
 let () =
-  let result =
-    with_channel "input"
-      (fun channel ->
-         let stream = Stream.of_channel channel in
-         eval stream)
-  in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_single_line (fun s -> s))
+    ~aoc_solver:eval
+    ~aoc_printer:string_of_int

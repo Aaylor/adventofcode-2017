@@ -69,6 +69,14 @@ let with_channel filename fn =
     close_in channel;
     raise exn
 
+let parse_lines line (max_layer, acc) =
+  let layer, depth =
+    Scanf.sscanf line
+      "%d: %d"
+      (fun layer depth -> layer, depth)
+  in
+  (max max_layer layer), ((layer, depth) :: acc)
+
 let extract_lines channel =
   let rec lines max_layer acc =
     try

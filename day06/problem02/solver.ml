@@ -79,28 +79,12 @@ let steps layout =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let input_memory_layout channel =
-  try
-    let line = input_line channel in
-    (* We assume that the input is always separated by tabulations *)
-    let layout_str = String.split_on_char '\t' line in
-    Array.of_list (List.map int_of_string layout_str)
-  with
-  | End_of_file ->
-    failwith "Expected at least one line"
-
 let () =
-  let layout = with_channel "input" input_memory_layout in
-  (* let layout = [| 0; 2; 7; 0 |] in *)
-  let result = steps layout in
-  Format.printf "%d@." result
+  let map_line line =
+    let layout_string = String.split_on_char '\t' line in
+    Array.of_list (List.map int_of_string layout_string)
+  in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_single_line map_line)
+    ~aoc_solver:steps
+    ~aoc_printer:string_of_int

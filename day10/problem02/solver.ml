@@ -93,16 +93,6 @@ let do_hash lengths =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
 let extract_ascii_characters ~length line =
   let rec aux_eval acc index =
     if index < 0 then
@@ -113,16 +103,13 @@ let extract_ascii_characters ~length line =
   in
   aux_eval [] (length -1)
 
-let input_lengths channel =
-  try
-    let line = input_line channel in
-    let length = String.length line in
-    let input = extract_ascii_characters ~length line in
-    input @ [17; 31; 73; 47; 23]
-  with End_of_file ->
-    failwith "The input must have at least one line"
+let input_lengths line =
+  let length = String.length line in
+  let input = extract_ascii_characters ~length line in
+  input @ [17; 31; 73; 47; 23]
 
 let () =
-  let lengths = with_channel "input" input_lengths in
-  let result = do_hash lengths in
-  Format.printf "%s@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_single_line input_lengths)
+    ~aoc_solver:do_hash
+    ~aoc_printer:(fun s -> s)
