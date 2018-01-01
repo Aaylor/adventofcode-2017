@@ -45,9 +45,10 @@ let swap dancefloor (i1, p1) (i2, p2) =
   update dancefloor i1 p2;
   update dancefloor i2 p1
 
-let print_dancefloor dancefloor =
-  Array.iter print_char dancefloor.floor;
-  Format.printf "@."
+let dancefloor_to_string dancefloor =
+  let buffer = Buffer.create 13 in
+  Array.iter (Buffer.add_char buffer) dancefloor.floor;
+  Buffer.contents buffer
 
 
 (* DANSE *)
@@ -81,25 +82,9 @@ let danse moves =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let extract_moves channel =
-  try
-    let line = input_line channel in
-    let moves = String.split_on_char ',' line in
-    List.map move_of_string moves
-  with End_of_file ->
-    failwith "Input must have at least one line"
-
 let () =
-  let moves = with_channel "input" extract_moves in
-  let dancefloor = danse moves in
-  print_dancefloor dancefloor
+  let extract_moves l = List.map move_of_string (String.split_on_char ',' l) in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_single_line extract_moves)
+    ~aoc_solver:danse
+    ~aoc_printer:dancefloor_to_string

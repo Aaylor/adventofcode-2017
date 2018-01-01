@@ -106,28 +106,11 @@ let eval_moves moves =
   aux_eval 0 empty_map moves
 
 
-(* Input *)
-
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let extract_moves channel =
-  try
-    let line = input_line channel in
-    let line' = String.split_on_char ',' line in
-    List.map move_of_string line'
-  with End_of_file ->
-    failwith "Input need at least one line."
-
+(* INPUT *)
 
 let () =
-  let moves = with_channel "input" extract_moves in
-  let result = eval_moves moves in
-  Format.printf "%d@." result
+  let parse_line l = List.map move_of_string (String.split_on_char ',' l) in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_single_line parse_line)
+    ~aoc_solver:eval_moves
+    ~aoc_printer:string_of_int

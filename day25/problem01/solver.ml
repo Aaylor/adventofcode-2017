@@ -157,6 +157,7 @@ let parse_tape channel =
   { state = begin_state; steps; states; cursor = 0; values = TapeMap.empty;  }
 
 let () =
-  let context = with_channel "input" parse_tape in
-  let diagnostic = run context in
-  Format.printf "%d@." diagnostic
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_custom parse_tape)
+    ~aoc_solver:run
+    ~aoc_printer:string_of_int

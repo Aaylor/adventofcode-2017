@@ -1,5 +1,5 @@
 
-module StringMap = Map.Make(String)
+open Aoc_lib
 
 (* Fractal *)
 
@@ -146,40 +146,26 @@ let store_transformations map initial_input transformation =
   in
   aux_iterate 0 map initial_input
 
-
-(* INPUT *)
-
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let fold_lines channel =
-  let rec aux_fold_lines map =
-    try
-      let line = input_line channel in
-      let input, transformation =
-        Scanf.sscanf line
-          "%s => %s"
-          (fun s1 s2 -> s1, s2)
-      in
-      let map' = store_transformations map input transformation in
-      aux_fold_lines map'
-    with End_of_file ->
-      map
-  in
-  aux_fold_lines StringMap.empty
-
 let start_pattern = ".#./..#/###"
 let iteration = 18
 
+let solve pattern iteration map =
+  let final_pattern = transform_input map pattern iteration in
+  count_pixel_on final_pattern
+
+
+(* INPUT *)
+
+let parse_lines line map =
+  let input, transformation =
+    Scanf.sscanf line
+      "%s => %s"
+      (fun s1 s2 -> s1, s2)
+  in
+  store_transformations map input transformation
+
 let () =
-  let map = with_channel "input" fold_lines in
-  let final_pattern = transform_input map start_pattern iteration in
-  let count = count_pixel_on final_pattern in
-  Format.printf "%d@." count
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines ~start:StringMap.empty parse_lines)
+    ~aoc_solver:(solve start_pattern iteration)
+    ~aoc_printer:string_of_int

@@ -70,16 +70,6 @@ let closest_to_origin particles =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
 let parse_line line =
   Scanf.sscanf line "p=<%d,%d,%d>, v=<%d,%d,%d>, a=<%d,%d,%d>"
     (fun px py pz vx vy vz ax ay az ->
@@ -87,18 +77,9 @@ let parse_line line =
          velocity = { x = vx; y = vy; z = vz };
          acceleration = { x = ax; y = ay; z = az } })
 
-let extract_particles channel =
-  let rec aux_extract acc =
-    try
-      let line = input_line channel in
-      let particle = parse_line line in
-      aux_extract (particle :: acc)
-    with End_of_file ->
-      List.rev acc
-  in
-  aux_extract []
-
 let () =
-  let particles = with_channel "input" extract_particles in
-  let result = closest_to_origin particles in
-  Format.printf "%d@." result
+  let parse_particle line acc = parse_line line :: acc in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines_ordered ~start:[] parse_particle)
+    ~aoc_solver:closest_to_origin
+    ~aoc_printer:string_of_int

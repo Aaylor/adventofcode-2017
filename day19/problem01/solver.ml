@@ -43,6 +43,7 @@ let entry_point graph =
     y = 0 }
 
 let find_way graph =
+  let buffer = Buffer.create 13 in
   let rec do_move coordinate move =
     match get graph coordinate with
     | None ->
@@ -55,39 +56,22 @@ let find_way graph =
       let coordinate' = next_coordinate coordinate move' in
       do_move coordinate' move'
     | Some ('A'..'Z' as c) ->
-      Format.printf "%c" c;
+      Buffer.add_char buffer c;
       do_move (next_coordinate coordinate move) move
     | Some ('|' | '-') ->
       do_move (next_coordinate coordinate move) move
     | _ ->
       failwith "Unknown character."
   in
-  do_move (entry_point graph) Down
+  do_move (entry_point graph) Down;
+  Buffer.contents buffer
 
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let construct_graph channel =
-  let rec extract_lines acc =
-    try
-      let line = input_line channel in
-      extract_lines (line :: acc)
-    with End_of_file ->
-      Array.of_list (List.rev acc)
-  in
-  extract_lines []
-
 let () =
-  let graph = with_channel "input" construct_graph in
-  find_way graph;
-  Format.printf "@."
+  let parse_line line acc = line :: acc in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines_ordered ~start:[] parse_line)
+    ~aoc_solver:(fun l -> find_way (Array.of_list l))
+    ~aoc_printer:(fun s -> s)

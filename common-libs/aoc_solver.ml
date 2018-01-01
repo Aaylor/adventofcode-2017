@@ -7,6 +7,7 @@ type 'input aoc_parser =
   | SingleLine: (string -> 'input) -> 'input aoc_parser
   | AllLines: 'input * (string -> 'input -> 'input) -> 'input aoc_parser
   | OrderedAllLines: 'input * (string -> 'input -> 'input) -> 'input aoc_parser
+  | Custom: (in_channel -> 'input) -> 'input aoc_parser
 
 let parser_static input =
   Static input
@@ -25,6 +26,9 @@ let parser_all_lines ~start callback =
 
 let parser_all_lines_ordered ~start callback =
   OrderedAllLines (start, callback)
+
+let parser_custom callback =
+  Custom callback
 
 
 let with_channel filename fn =
@@ -77,7 +81,8 @@ let solve ~aoc_parser ~aoc_solver ~aoc_printer =
       with_channel "input" (all_lines start callback)
     | OrderedAllLines (start, callback) ->
       with_channel "input" (ordered_all_lines start callback)
-
+    | Custom callback ->
+      with_channel "input" callback
   in
   let result = aoc_solver input in
   let end_time = Unix.gettimeofday () in

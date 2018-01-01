@@ -70,48 +70,31 @@ let do_duet instructions =
   in
   aux_duet ~count:0 Register.empty 0
 
+
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let parse_instruction line =
+let parse_instruction line acc =
   let parse_rvalue rvalue =
     try Int (int_of_string rvalue)
     with Failure _ -> Register rvalue
   in
-  match String.split_on_char ' ' line with
-  | [ "set"; register; rvalue ] ->
-    Set (register, parse_rvalue rvalue)
-  | [ "sub"; register; rvalue ] ->
-    Sub (register, parse_rvalue rvalue)
-  | [ "mul"; register; rvalue ] ->
-    Mul (register, parse_rvalue rvalue)
-  | [ "jnz"; rvalue; rvalue' ] ->
-    Jump (parse_rvalue rvalue, parse_rvalue rvalue')
-  | _ ->
-    failwith ("Unknonw instruction: " ^ line)
-
-let parse_instructions channel =
-  let rec aux_parse acc =
-    try
-      let line = input_line channel in
-      let instruction = parse_instruction line in
-      aux_parse (instruction :: acc)
-    with End_of_file ->
-      List.rev acc
+  let instruction =
+    match String.split_on_char ' ' line with
+    | [ "set"; register; rvalue ] ->
+      Set (register, parse_rvalue rvalue)
+    | [ "sub"; register; rvalue ] ->
+      Sub (register, parse_rvalue rvalue)
+    | [ "mul"; register; rvalue ] ->
+      Mul (register, parse_rvalue rvalue)
+    | [ "jnz"; rvalue; rvalue' ] ->
+      Jump (parse_rvalue rvalue, parse_rvalue rvalue')
+    | _ ->
+      failwith ("Unknonw instruction: " ^ line)
   in
-  let result = aux_parse [] in
-  Array.of_list result
+  instruction :: acc
 
 let () =
-  let instructions = with_channel "input" parse_instructions in
-  let result = do_duet instructions in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines_ordered ~start:[] parse_instruction)
+    ~aoc_solver:(fun is -> do_duet (Array.of_list is))
+    ~aoc_printer:string_of_int

@@ -229,7 +229,6 @@ end
 
 (* INPUT *)
 
-let input = "xlqgujun"
 let input_max = 128
 
 let extract_ascii_characters ~length line =
@@ -251,7 +250,7 @@ let solve line_no l =
   let (module Solver: SOLVER) = (module Solver(struct let lengths = l end)) in
   Solver.solve line_no
 
-let iterate_inputs () =
+let iterate_inputs input =
   let rec aux_iterate index =
     if index < input_max then begin
       (* Calculate the input. *)
@@ -262,8 +261,11 @@ let iterate_inputs () =
       aux_iterate (succ index)
     end
   in
-  aux_iterate 0
+  aux_iterate 0;
+  Graph.groups ()
 
 let () =
-  iterate_inputs ();
-  Format.printf "%d@." (Graph.groups ());
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_static "xlqgujun")
+    ~aoc_solver:iterate_inputs
+    ~aoc_printer:string_of_int

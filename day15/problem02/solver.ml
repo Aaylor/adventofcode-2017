@@ -38,22 +38,11 @@ let judge generator =
     end else
       count
   in
-  (* let index = 40_000_000 in *)
   let index = 5_000_000 in
   loop ~generator ~index ~count:0
 
 
 (* INPUT *)
-
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
 
 let extract_input channel =
   try
@@ -67,8 +56,7 @@ let extract_input channel =
     failwith "The file should contain at least 2 lines."
 
 let () =
-  let generator = with_channel "input" extract_input in
-  (* let generator = { a = Int64.of_int 65; b = Int64.of_int 8921 } in *)
-  let result = judge generator in
-  Format.printf "%d@." result
-  
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_custom extract_input)
+    ~aoc_solver:judge
+    ~aoc_printer:string_of_int

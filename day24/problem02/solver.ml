@@ -69,41 +69,25 @@ let start_bridge map =
          else (size, strength))
       set (0, 0)
 
+
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
+let register n port map =
+  let set' =
+    match IntMap.find_opt n map with
+    | None -> PortSet.singleton port
+    | Some set -> PortSet.add port set
+  in
+  IntMap.add n set' map
 
-let extract_ports channel =
-  let register n port map =
-    let set' =
-      match IntMap.find_opt n map with
-      | None -> PortSet.singleton port
-      | Some set -> PortSet.add port set
-    in
-    IntMap.add n set' map
-  in
-  let rec aux_extract_ports map =
-    try
-      let line = input_line channel in
-      let v1, v2 = Scanf.sscanf line "%d/%d" (fun v1 v2 -> v1, v2 ) in
-      let port = { v1; v2 } in
-      register v1 port map |>
-      register v2 port |>
-      aux_extract_ports
-    with End_of_file ->
-      map
-  in
-  aux_extract_ports IntMap.empty
+let parse_ports line map =
+  let v1, v2 = Scanf.sscanf line "%d/%d" (fun v1 v2 -> v1, v2 ) in
+  let port = { v1; v2 } in
+  register v1 port map |>
+  register v2 port
 
 let () =
-  let ports = with_channel "input" extract_ports in
-  let _, result = start_bridge ports in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines ~start:IntMap.empty parse_ports)
+    ~aoc_solver:start_bridge
+    ~aoc_printer:(fun result -> string_of_int (snd result))

@@ -66,27 +66,9 @@ let find_way graph =
 
 (* INPUT *)
 
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let construct_graph channel =
-  let rec extract_lines acc =
-    try
-      let line = input_line channel in
-      extract_lines (line :: acc)
-    with End_of_file ->
-      Array.of_list (List.rev acc)
-  in
-  extract_lines []
-
 let () =
-  let graph = with_channel "input" construct_graph in
-  let result = find_way graph in
-  Format.printf "%d@." result
+  let parse_line line acc = line :: acc in
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines_ordered ~start:[] parse_line)
+    ~aoc_solver:(fun l -> find_way (Array.of_list l))
+    ~aoc_printer:string_of_int

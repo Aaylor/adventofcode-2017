@@ -106,7 +106,6 @@ end
 
 (* INPUT *)
 
-let input = "xlqgujun"
 let input_max = 128
 
 let extract_ascii_characters ~length line =
@@ -128,7 +127,7 @@ let solve l =
   let (module Solver: SOLVER) = (module Solver(struct let lengths = l end)) in
   Solver.solve ()
 
-let iterate_inputs () =
+let iterate_inputs input =
   let rec aux_iterate bits index =
     if index < input_max then
       (* Calculate the input. *)
@@ -143,5 +142,7 @@ let iterate_inputs () =
   aux_iterate 0 0
 
 let () =
-  let result = iterate_inputs () in
-  Format.printf "%d@." result;
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_static "xlqgujun")
+    ~aoc_solver:iterate_inputs
+    ~aoc_printer:string_of_int

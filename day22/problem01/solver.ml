@@ -47,7 +47,7 @@ let change_direction current_direction move =
   | East -> if move = Left then North else South
   | West -> if move = Left then South else North
 
-let sporifica_virus max_bursts coordinate map =
+let sporifica_virus max_bursts (coordinate, map) =
   let rec do_moves index infections coordinate direction map =
     if index < max_bursts then
       let infections, next_move, map' =
@@ -59,7 +59,7 @@ let sporifica_virus max_bursts coordinate map =
       let coordinate' = next_coordinate coordinate next_direction in
       do_moves (succ index) infections coordinate' next_direction map'
     else
-      infections, map
+      infections
   in
   do_moves 0 0 coordinate North map
 
@@ -76,18 +76,6 @@ let with_channel filename fn =
     close_in channel;
     raise exn
 
-let foldi_string fn acc line =
-  let length = String.length line in
-  let rec aux_fold index acc =
-    if index >= length then
-      acc
-    else
-      let c = line.[index] in
-      let acc' = fn index acc c in
-      aux_fold (succ index) acc'
-  in
-  aux_fold 0 acc
-
 let extract_lines channel =
   let rec exhaust acc =
     try exhaust (input_line channel :: acc)
@@ -103,7 +91,7 @@ let extract_lines channel =
     List.fold_left
       (fun (index_y, map) line ->
          let map' =
-           foldi_string
+           Aoc_lib.ExtString.foldi
              (fun index_x map character ->
                 if character = '#' then
                   let coordinate = { x = index_x; y = index_y } in
@@ -122,6 +110,7 @@ let extract_lines channel =
 let bursts = 10_000
 
 let () =
-  let coordinate_start, map = with_channel "input" extract_lines in
-  let result, _map = sporifica_virus bursts coordinate_start map in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_custom extract_lines)
+    ~aoc_solver:(sporifica_virus bursts)
+    ~aoc_printer:string_of_int

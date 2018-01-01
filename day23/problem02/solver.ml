@@ -46,5 +46,10 @@ let solve () =
   aux_count_of_prime_numbers 0 input_b
 
 
+(* INPUT *)
+
 let () =
-  Format.printf "%d@." (solve ())
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_static ())
+    ~aoc_solver:solve
+    ~aoc_printer:string_of_int

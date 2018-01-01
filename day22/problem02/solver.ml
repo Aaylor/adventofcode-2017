@@ -64,7 +64,7 @@ let change_direction current_direction move =
     | East -> if move = `Left then North else South
     | West -> if move = `Left then South else North
 
-let sporifica_virus max_bursts coordinate map =
+let sporifica_virus max_bursts (coordinate, map) =
   let rec do_moves index infections coordinate direction map =
     if index < max_bursts then
       let infections, next_move, map' =
@@ -78,7 +78,7 @@ let sporifica_virus max_bursts coordinate map =
       let coordinate' = next_coordinate coordinate next_direction in
       do_moves (succ index) infections coordinate' next_direction map'
     else
-      infections, map
+      infections
   in
   do_moves 0 0 coordinate North map
 
@@ -141,6 +141,7 @@ let extract_lines channel =
 let bursts = 10_000_000
 
 let () =
-  let coordinate_start, map = with_channel "input" extract_lines in
-  let result, _map = sporifica_virus bursts coordinate_start map in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_custom extract_lines)
+    ~aoc_solver:(sporifica_virus bursts)
+    ~aoc_printer:string_of_int

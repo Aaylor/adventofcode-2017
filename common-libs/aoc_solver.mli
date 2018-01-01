@@ -7,6 +7,7 @@ val parser_static: 'a -> 'a aoc_parser
 val parser_single_line: (string -> 'a) -> 'a aoc_parser
 val parser_single_string_line: string aoc_parser
 val parser_single_int_line: int aoc_parser
+val parser_custom: (in_channel -> 'a) -> 'a aoc_parser
 
 (*  *)
 val parser_all_lines: start:'a -> (string -> 'a -> 'a) -> 'a aoc_parser

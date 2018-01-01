@@ -35,12 +35,18 @@ let rec find_result spinlock values =
     if x = (values - 1) then y
     else find_result (y :: spinlock) values
 
+let solve values input =
+  let spinlock = do_spinlock values input in
+  find_result spinlock values
+
+
 (* INPUT *)
 
 let values = 2018
 let input = 369
 
 let () =
-  let spinlock = do_spinlock values input in
-  let result = find_result spinlock values in
-  Format.printf "%d@." result
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_static input)
+    ~aoc_solver:(solve values)
+    ~aoc_printer:string_of_int

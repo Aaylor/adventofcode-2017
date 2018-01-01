@@ -1,5 +1,4 @@
 
-
 type layer =
   { depth: int;
     current_position: int;
@@ -66,48 +65,31 @@ let find_delay layers =
     with Has_been_caught ->
       aux_find_delay new_layer_saved (succ count)
   in
-  (* We must at delay at least once, otherwise it will be caught
+  (* We must delay at least once, otherwise it will be caught
      by the first scanner. *)
   aux_find_delay layers 1
 
-
-(* INPUT *)
-
-let with_channel filename fn =
-  let channel = open_in filename in
-  try
-    let result = fn channel in
-    close_in channel;
-    result
-  with exn ->
-    close_in channel;
-    raise exn
-
-let extract_lines channel =
-  let rec lines max_layer acc =
-    try
-      let line = input_line channel in
-      let layer, depth =
-        Scanf.sscanf line
-          "%d: %d"
-          (fun layer depth -> layer, depth)
-      in
-      lines (max max_layer layer) ((layer, depth) :: acc)
-    with End_of_file -> max_layer, acc
-  in
-  lines 0 []
-
-let process_input channel =
-  let max_layer, layers = extract_lines channel in
+let eval_packet_scanner (max_layer, layers) =
   let layers_array = Array.make (max_layer + 1) None in
   List.iter
     (fun (layer, depth) ->
        layers_array.(layer) <- Some { depth; current_position = 0; next = 1 })
     layers;
-  layers_array
+  find_delay layers_array
+
+
+(* INPUT *)
+
+let extract_lines line (max_layer, acc) =
+  let layer, depth =
+    Scanf.sscanf line
+      "%d: %d"
+      (fun layer depth -> layer, depth)
+  in
+  (max max_layer layer), ((layer, depth) :: acc)
 
 let () =
-  let layers = with_channel "input" process_input in
-  let result = find_delay layers in
-  Format.printf "%d@." result
-
+  Aoc_solver.solve
+    ~aoc_parser:(Aoc_solver.parser_all_lines ~start:(0, []) extract_lines)
+    ~aoc_solver:eval_packet_scanner
+    ~aoc_printer:string_of_int
